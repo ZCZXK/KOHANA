@@ -1,3 +1,8 @@
+await play.setToken({
+  youtube: {
+    cookie: process.env.YT_COOKIE || ""
+  }
+});
 require("dotenv").config();
 const {
   Client,
