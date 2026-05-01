@@ -1,8 +1,3 @@
-await play.setToken({
-  youtube: {
-    cookie: process.env.YT_COOKIE || ""
-  }
-});
 require("dotenv").config();
 const {
   Client,
@@ -54,7 +49,9 @@ async function playSong(guild, song) {
     return;
   }
 
-  const stream = await play.stream(song.url);
+  const stream = await play.stream(song.url, {
+  discordPlayerCompatibility: true
+});
   const resource = createAudioResource(stream.stream, {
     inputType: stream.type,
     inlineVolume: true
@@ -110,10 +107,10 @@ client.on("messageCreate", async (message) => {
 
   // ▶️ PLAY
   if (cmd === "play") {
-    if (!voice) return message.reply("❌ Join VC");
+    if (!voice) return message.reply("PLEASE JOIN VC FIRST 🍁");
 
     const query = args.join(" ");
-    if (!query) return message.reply("❌ Give song");
+    if (!query) return message.reply("No queue");
 
     let song;
 
@@ -172,7 +169,7 @@ client.on("messageCreate", async (message) => {
     const queue = queues.get(guildId);
     if (!queue) return;
     queue.player.stop();
-    message.reply("⏭️ Skipped");
+    message.reply("⏭️ song Skipped");
   }
 
   // ⏭️ SKIP TO
@@ -182,7 +179,7 @@ client.on("messageCreate", async (message) => {
 
     const num = Number(args[0]);
     if (!num || num < 1 || num > queue.songs.length)
-      return message.reply("❌ Invalid number");
+      return message.reply("Invalid number ❌");
 
     queue.songs.splice(0, num - 1);
     queue.player.stop();
@@ -197,7 +194,7 @@ client.on("messageCreate", async (message) => {
 
     queue.songs = [];
     queue.player.stop();
-    message.reply("⏹️ Stopped");
+    message.reply("song stopped successfully ⏹️");
   }
 
   // ⏸️ PAUSE
@@ -206,7 +203,7 @@ client.on("messageCreate", async (message) => {
     if (!queue) return;
 
     queue.player.pause();
-    message.reply("⏸️ Paused");
+    message.reply("song paused ⏸️");
   }
 
   // ▶️ RESUME
@@ -215,7 +212,7 @@ client.on("messageCreate", async (message) => {
     if (!queue) return;
 
     queue.player.unpause();
-    message.reply("▶️ Resumed");
+    message.reply("song resumed ▶️");
   }
 
   // 🔊 VOLUME
@@ -244,7 +241,7 @@ client.on("messageCreate", async (message) => {
   if (cmd === "queue") {
     const queue = queues.get(guildId);
     if (!queue || !queue.songs.length)
-      return message.reply("❌ Empty");
+      return message.reply("queue is empty ❌");
 
     const list = queue.songs.map((s, i) => `${i + 1}. ${s.title}`).join("\n");
     message.reply(`📜 Queue:\n${list}`);
@@ -266,7 +263,7 @@ client.on("interactionCreate", async (i) => {
 
   const queue = queues.get(i.guild.id);
   if (!queue)
-    return i.reply({ content: "❌ Nothing playing", ephemeral: true });
+    return i.reply({ content: "Nothing playing ❌", ephemeral: true });
 
   if (i.customId === "pause") {
     queue.player.pause();
